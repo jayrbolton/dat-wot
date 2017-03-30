@@ -1,7 +1,6 @@
+# dat + pgp for user interaction around data sharing
 
-# dat + pgp
-
-This integrates dat with open pgp and a metadata system to allow for encrypted messaging and dat discovery among dat users tied to pgp pubkeys. This lib wraps dat-node and uses a functional, non-OO interface.
+This integrates dat with open pgp and a metadata system to allow for encrypted messaging and dat discovery among dat users tied to pgp keypairs.
 
 _what it does_
 - dat-pgp creates and manages a `metadat` dat directory that stores your pubkey and all your metadata
@@ -13,69 +12,22 @@ _what it does_
 _how it can be used_
 - User Finn creates a PGP key pair and metadat directory on his device
 - Finn shares his user ID with Jake, and Jake shares his ID back
-- Finn and Jake can now share dats, files, and messages with each other using dat
-- All connections are P2P, and any data can be encrypted and shared
+- Finn and Jake can now share dats, files, and messages with each other using the dat protocol
+- All connections are P2P, and any private data can be initially share using pgp encryption
 
-Your contacts' metadats are stored 
-
-Your data is not stored in your metadat, but your metadat will keep track of where you have it.
+Your data is not stored in your metadat, but your metadat will keep track of information about your data data. The metadat keeps track of things like your trusted contacts, other groups, publicly available dat addresses for other people, encrypted private dat addresses for specific people or groups, and can keep a keyring of other dat users' pgp pubkeys.
 
 # api
 
-## initialize()
-
-Initialize it with your metadat folder
+## setup(path), load(path)
 
 ```js
-import initialize from 'pgp-dat'
-const api = initialize('~/.metadat')
+const fs = require('fs')
+const metadat = require('metadat')
+
+// Initialize a new metadat with a new pgp key
+metadata.setup('/my/new/directory/path')
+
+// Load an existing metadat
+metadata.load('/my/existing/directory/path')
 ```
-
-## api.user
-
-This is an object containing data about your current user
-
-```js
-api.user // -> {name: 'finn', addr: 'xyz', path: }
-```
-
-## api.addDat(name, path)
-
-Create a dat in a directory with a readable name. Returns an object with data about that dat/
-
-```js
-const dat1 = api.addDat('myDat1', '~/dats/myDat1')
-```
-
-## api.listDats(user)
-
-List the available dat names for a given user.
-
-```js
-api.listDats(api.user) // -> ['myDat1']
-```
-
-## api.listAllDats()
-
-List all available dats on yourself, plus all contacts.
-
-## api.removeDat(name)
-
-## api.addContact(datAddr)
-
-## api.shareDat(name, contact)
-
-## api.makePublic(name)
-
-## api.downloadDat(user, name)
-
-Download a dat from a user
-
-## api.sendMessage(user, message)
-
-Send a message to a user
-
-## api.readInbox()
-
-Read your messages; returns an array of message objects. Your messages stored in SQLite.
-
