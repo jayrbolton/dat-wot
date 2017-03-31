@@ -31,3 +31,63 @@ metadata.setup('/my/new/directory/path')
 // Load an existing metadat
 metadata.load('/my/existing/directory/path')
 ```
+
+## On-disk data
+
+My private data folder (not a dat)
+  * Who I follow
+  * My pgp private/public key
+  
+```
+~/.metadat/contacts/contact1/  (dat)
+~/.metadat/contacts/contact2/  (dat)
+~/.metadat/.keys/ (pgp stuff)
+```
+  
+My public data folder (dat)
+  * My pgp public key
+  * My list of dats (could be a simple json file to start but then evolve to be more secret later, e.g., cryptodb.)
+    * some encrypted 
+    * some not encrypted
+      
+```
+~/.metadat/me/public.key
+~/.metadat/me/dats.json
+```
+
+dats.json
+```
+{"key": {"public": true}}
+```
+
+How do I tell if one is encrypted for me or not? In this model I'd have to try to decrypt everything or look at the signature
+
+
+## TODO
+
+```
+// Add my dat at the given path to the list of dats.
+// Takes the address and adds it to the database
+metadat.add(path, {public: true})
+
+// Add a contact, saving their public key locally
+metadat.addContact(userMetadatAddress)
+
+// See a user's list of dats without adding them as a contact
+metadat.listUsersDats(userMetadatAddress)
+
+// See a list of my local dats
+metadat.list()
+
+// Encrypted version of the address gets saved. Users following me are able to unencrypt the dats they have access to. 
+metadat.share(key, userMetadatAddress[es])
+```
+
+## Groups
+
+PGP groups could be used to add multiple people to the same list of dats. 
+
+
+
+```
+
