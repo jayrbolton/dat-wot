@@ -7,14 +7,9 @@
     "test": "test"
   },
   "dependencies": {
-    "dat": "^11.6.0",
+    "dat": "11.6.0",
     "dat-node": "0.1.3",
-    "flyd": "0.2.4",
-    "flyd-zip": "0.0.1",
-    "openpgp": "2.5.3",
-    "ramda": "0.22.1",
-    "sqlite": "2.5.0",
-    "sqlite3": "^3.1.8"
+    "openpgp": "2.5.3"
   },
   "devDependencies": {},
   "scripts": {
@@ -29,7 +24,7 @@
     "pgp"
   ],
   "author": "jay r bolton <jayrbolton@gmail.com> (http://jayrbolton.com/)",
-  "license": "MIT",
+  "license": "GPL",
   "bugs": {
     "url": "https://github.com/jayrbolton/metadat/issues"
   },
