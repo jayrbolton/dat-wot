@@ -1,93 +1,174 @@
-# dat + pgp for user interaction around data sharing
+# dat + pgp for encrypted, p2p user interaction and data sharing
 
-This integrates dat with open pgp and a metadata system to allow for encrypted messaging and dat discovery among dat users tied to pgp keypairs.
+This integrates dat with Open PGP to allow for a 100% p2p and encrypted data sharing system and user-level controls, like controlling who can see what directories. This is intented to be a node API on which we will build a file-sharing UI with user interaction.
 
 _what it does_
-- dat-pgp creates and manages a `metadat` dat directory that stores your pubkey and all your metadata
-- your pgp pubkey plus your metadat constitutes a kind of _"dat user profile"_
-- the address of the `metadat` is the public ID of your "dat user"
-- the metadat has a keyring of your pgp contacts, plus directories of your dats, plus permissions on those dats, plus readable names
-- you can store any metadata in your metadat; for example, assigning readable names to your dats
-
-_how it can be used_
-- User Finn creates a PGP key pair and metadat directory on his device
-- Finn shares his user ID with Jake, and Jake shares his ID back
-- Finn and Jake can now share dats, files, and messages with each other using the dat protocol
-- All connections are P2P, and any private data can be initially share using pgp encryption
-
-Your data is not stored in your metadat, but your metadat will keep track of information about your data data. The metadat keeps track of things like your trusted contacts, other groups, publicly available dat addresses for other people, encrypted private dat addresses for specific people or groups, and can keep a keyring of other dat users' pgp pubkeys.
+- publicly share directories on your device
+- privately share directories and control permissions with other people and groups
+- privately send messages
 
 # api
 
-## setup(path), load(path)
+## setup(options, cb)
+
+Create a new metadat user. The `options` takes these parameters:
+* path: path you want to use to save your data
+* name: name to use for this device/user
+* passphrase: passphrase for generating pgp keys
+
+`setup` takes an optional callback, which receives the device's public metadat address as the first argument, and the pgp key object as the second argument.
 
 ```js
-const fs = require('fs')
 const metadat = require('metadat')
 
-// Initialize a new metadat with a new pgp key
-metadata.setup('/my/new/directory/path')
-
-// Load an existing metadat
-metadata.load('/my/existing/directory/path')
+metadat.setup({
+  path: '~/.metadat'
+, name: 'bob ross'
+, passphrase: '123abc'
+}, function(user) {
+  // user is an object with pgp keys, dat keys, and contact array
+})
 ```
 
-## On-disk data
+## load(path, passphrase)
 
-My private data folder (not a dat)
-  * Who I follow
-  * My pgp private/public key
-  
-```
-~/.metadat/contacts/contact1/  (dat)
-~/.metadat/contacts/contact2/  (dat)
-~/.metadat/.keys/ (pgp stuff)
-```
-  
-My public data folder (dat)
-  * My pgp public key
-  * My list of dats (could be a simple json file to start but then evolve to be more secret later, e.g., cryptodb.)
-    * some encrypted 
-    * some not encrypted
-      
-```
-~/.metadat/me/public.key
-~/.metadat/me/dats.json
+This will load an existing metadat root directory and unencrypt things using the given passphrase.
+
+```js
+metadat.loadUser('~/.metadat', '123abc', function(user) {
+  // the user object is provided, needed for many functions below
+  user.publicKeyArmored // pgp public key
+  user.publicMetadat // key of the user's public metadat
+  user.publicDats // array of public dat addresses
+  user.privateDats // array of non-public dat addresses for this metadat
+  user.relationships // array of user objects
+  user.relationships[0] // user object of contact.. {name: 'Bob Ross', pubKey: 'xyz', metadat: 'xyz', etc}
+  user.follows // array of user objects
+  user.follows[0] // user object
+})
 ```
 
-dats.json
-```
-{"key": {"public": true}}
-```
+## loadDats(userA, userB, cb)
 
-How do I tell if one is encrypted for me or not? In this model I'd have to try to decrypt everything or look at the signature
+Load an array of shared dats from another user
 
-
-## TODO
-
-```
-// Add my dat at the given path to the list of dats.
-// Takes the address and adds it to the database
-metadat.add(path, {public: true})
-
-// Add a contact, saving their public key locally
-metadat.addContact(userMetadatAddress)
-
-// See a user's list of dats without adding them as a contact
-metadat.listUsersDats(userMetadatAddress)
-
-// See a list of my local dats
-metadat.list()
-
-// Encrypted version of the address gets saved. Users following me are able to unencrypt the dats they have access to. 
-metadat.share(key, userMetadatAddress[es])
+```js
+metadat.loadDats(userA, userB, function(dats) {
+  // dats is an array of dat objects that userB has shared with userA
+})
 ```
 
-## Groups
+## share(userA, datKey, userB, cb)
 
-PGP groups could be used to add multiple people to the same list of dats. 
+Share a regular dat with a contact. It will find the relationship metadat for this contact and add the given dat key into the list of shared dats.
 
-
-
+```js
+// User with key userA shares dat with key 'datKey' with contact  userB
+metadat.share(userA, 'datKey', userB, function() {
+  // Share is complete
+})
 ```
 
+## groupShare(userA, datKey, groupName, cb)
+
+Share a dat with a group
+
+```js
+metadat.shareGroup(userA, 'datKey', 'groupName', function() {
+  // Share is complete
+})
+```
+
+## unshare(userKey, datKey, contactKey, cb)
+
+Removes a dat key from a relationship metadat and generates a new dat key, so the contact can no longer read any updates (but will likely still have a copy on their own device).
+
+```js
+// User userA unshares dat 'datKey' with contact userB
+metadat.unshare(userA, 'datKey', userB, function() {
+  // Unshare is complete
+})
+```
+
+## follow
+
+Follow another user's public metadat
+
+```js
+metadat.follow(userA, userB, function(dats) {
+  // dats is an array of public dats from userB
+})
+```
+
+## createRelationship(userA, userB, cb)
+
+Create a relationship metadat between two users. This creates a new dat for the relationship metadat, encrypts the key using `userB`'s pubkey, and places it in the first user's public metadat for the second user to read.
+
+The callback is called when the relationship handshake is initiated and the encrypted relationship metadat key has been created.
+
+```js
+metadat.addContact(userA, userB, function(data) {
+  data.key // relationship metadat key 
+  data.keyArmored // pgp-encrypted metadat key
+})
+```
+
+## addToGroup(userA, groupName, userB, cb) 
+
+Add a contact to a group.
+
+```js
+metadat.addToGroup(userA, 'groupName', userB, function() {
+  // Add to group is complete
+})
+```
+
+## create(userA, path, cb)
+
+Create a new dat, private by default. Pass in the user object and a path for the dat.
+
+```js
+metadat.create(userA, path, function(key) {
+  // dat is created, dat key is now available
+})
+```
+
+## publicize(userA, datKey, cb)
+
+Make a dat public for userA. This will add it into the public listing in their public metadat.
+
+```js
+metadat.publicize(userA, 'datKey', function() {
+  // dat is now public
+})
+```
+
+## privatize(userA, datKey, cb)
+
+Remove a dat key from your public listing and change the key.
+
+```js
+metadat.privatize(userA, 'datKey', function() {
+  // dat is no longer public
+})
+```
+
+## postMessage(userA, message, userB, cb)
+
+Post a message from one user to another
+
+```js
+metadat.postMessage(userA, 'message content', userB, function() {
+  // Message has been posted
+})
+```
+
+## readMessages(userA, cb)
+
+Read all messages for a user
+
+```js
+metadat.readMessages(userA, function(messages) {
+  // messages is an array of message objects
+})
+```
