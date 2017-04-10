@@ -7,13 +7,16 @@
     "test": "test"
   },
   "dependencies": {
-    "dat": "11.6.0",
-    "dat-node": "0.1.3",
-    "openpgp": "2.5.3"
+    "dat-node": "1.4.1",
+    "openpgp": "2.5.3",
+    "toiletdb": "1.2.1"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "tap-spec": "4.1.1",
+    "tape": "4.6.3"
+  },
   "scripts": {
-    "test": "node test/index.js"
+    "test": "([ -e /tmp/metadat-test ] && rm -r /tmp/metadat-test) ; tape test/index.js | tap-spec"
   },
   "repository": {
     "type": "git",
