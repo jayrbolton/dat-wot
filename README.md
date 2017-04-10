@@ -35,7 +35,7 @@ metadat.setup({
 This will load an existing metadat root directory and unencrypt things using the given passphrase.
 
 ```js
-metadat.loadUser('~/.metadat', '123abc', function(user) {
+metadat.load('~/.metadat', '123abc', function(user) {
   // the user object is provided, needed for many functions below
   user.publicKeyArmored // pgp public key
   user.publicMetadat // key of the user's public metadat
