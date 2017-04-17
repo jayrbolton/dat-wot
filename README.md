@@ -44,6 +44,30 @@ metadat.load('~/.metadat', '123abc', function(user) {
 })
 ```
 
+## handshake(userA, userBKey, cb)
+
+Initialize a handshake to establish a relationship/contact with another user. Pass in a dat address of userB's public metadat.
+
+This will create another dat, called the "relationship dat". That dat's address will get encrypted using userB's PGP pubkey and placed in userA's public metadat for userB to read and save.
+
+If both userA and userB successfully handshake with eachother, the contact is created.
+
+See checkHandshake
+
+```js
+handshake(userA, userBKey, function(dat, userA, userB) { })
+```
+
+## checkHandshake(userA, userB, cb)
+
+Check if userB has initiated a handshake for userA. If so, userA will validate the handshake file, decrypt the dat address, and pull the relationship dat.
+
+```js
+checkHandshake(userA, userB, function(dat, userA, userB) {
+  // dat will be the dat object for userB's relationship dat
+})
+```
+
 ## share(userA, datKey, userB, cb)
 
 Share a regular dat with a contact. It will find the relationship metadat for this contact and add the given dat key into the list of shared dats.
@@ -83,19 +107,6 @@ Follow another user's public metadat
 ```js
 metadat.follow(userA, userB, function(dats) {
   // dats is an array of public dats from userB
-})
-```
-
-## createRelationship(userA, userB, cb)
-
-Create a relationship metadat between two users. This creates a new dat for the relationship metadat, encrypts the key using `userB`'s pubkey, and places it in the first user's public metadat for the second user to read.
-
-The callback is called when the relationship handshake is initiated and the encrypted relationship metadat key has been created.
-
-```js
-metadat.addContact(userA, userB, function(data) {
-  data.key // relationship metadat key 
-  data.keyArmored // pgp-encrypted metadat key
 })
 ```
 
