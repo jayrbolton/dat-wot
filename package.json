@@ -7,9 +7,11 @@
     "test": "test"
   },
   "dependencies": {
-    "dat-node": "1.4.1",
+    "dat-node": "2.0.0",
     "openpgp": "2.5.3",
-    "toiletdb": "1.2.1"
+    "ramda": "0.23.0",
+    "toiletdb": "1.2.1",
+    "uuid": "3.0.1"
   },
   "devDependencies": {
     "tap-spec": "4.1.1",
