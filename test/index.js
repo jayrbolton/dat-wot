@@ -14,8 +14,6 @@ test('setup', (t) => {
   setup({path, name: 'jay', passphrase: 'arstarst', numBits: 512}, function(user) {
     // Test creation of all files
     t.assert(fs.existsSync(path), 'creates parent directory')
-    t.assert(fs.existsSync(path + '/.keys/private.key'), 'creates private key file')
-    t.assert(fs.existsSync(path + '/.keys/public.key'), 'creates public key file')
     t.assert(fs.existsSync(path + '/' + user.id + '/.dat'), 'creates public metadat')
     t.end()
   })
@@ -67,6 +65,7 @@ test.skip('follow', (t) => {
         })
       }
     }
+    // Initialize another dat user in a forked process
     const child = fork('./test/child-process-follows.js')
     child.on("message", (msg) => {
       const {name, data} = msg
@@ -108,6 +107,7 @@ test.skip('handshake and checkHandshake', (t) => {
       }
     }
 
+    // Initialize another dat user in a forked process
     const child = fork('./test/child-process-handshake.js')
     child.on("message", (msg) => {
       const {name, data} = msg
