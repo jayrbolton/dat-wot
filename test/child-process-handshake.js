@@ -8,9 +8,10 @@ const handlers = {
       process.send({name: 'handshakeComplete', data: user.id})
     })
   }
-, checkHandshake: (user, otherUserID) => {
-    const otherUser = json.read(user.dirs.follows + '/' + otherUserID + '/user.json')
-    checkHandshake(user, otherUser)
+, checkHandshake: (user, key) => {
+    checkHandshake(user, key, (userA, userB) => {
+      process.send({name: 'checkComplete', data: userA.relationships})
+    })
   }
 , completed: () => process.exit(1)
 }
