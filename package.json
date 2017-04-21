@@ -9,16 +9,16 @@
   "dependencies": {
     "dat-node": "2.0.0",
     "openpgp": "2.5.3",
-    "ramda": "0.23.0",
-    "toiletdb": "1.2.1",
-    "uuid": "3.0.1"
+    "uuid": "3.0.1",
+    "mirror-folder": "2.0.0",
+    "random-access-memory": "2.4.0"
   },
   "devDependencies": {
     "tap-spec": "4.1.1",
     "tape": "4.6.3"
   },
   "scripts": {
-    "test": "([ -e /tmp/metadat-test ] && rm -r /tmp/metadat-test) ; tape test/index.js | tap-spec"
+    "test": "([ -e test/tmp ] && rm -r test/tmp) ; tape test/index.js | tap-spec"
   },
   "repository": {
     "type": "git",
