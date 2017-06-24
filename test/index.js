@@ -51,51 +51,63 @@ test('create public dat', (t) => {
 
 test('follow', (t) => {
   const path = prefix + '/follow-test'
+  var user1
   createDir(path)
   const handlers = {
-    startFollow: (u1, key, child) => {
-      follow(u1, key, (u1, u2) => {
+    startFollow: (key, child) => {
+      follow(user1, key, (u1, u2) => {
+        console.log("in: parent process startFollow")
         const followPath = path + '/u1-base/follows/' + u2.name + '-' + u2.id
         t.assert(fs.existsSync(followPath + '/user.json'))
         t.strictEqual(u1.follows[u2.id], followPath)
         // close everything down
-        u1.publicMetadat.close()
+        user1.publicMetadat.close()
         child.send({name: 'completed'})
         t.end()
       })
     }
   }
+  const child = fork('./test/child-process-follow.js')
+  child.on("message", (msg) => handlers[msg.name](msg.data, child))
+  child.on('close', (code) =>console.log(`child process exited with code ${code}`))
   setup({path: path + '/u1-base', name: 'u1', passphrase: 'arstarst', numBits: 512}, (u1) => {
+    user1 = u1
+    console.log('finished parent process setup', new Date())
     // Initialize another dat user in a forked process
-    const child = fork('./test/child-process-follow.js')
-    child.on("message", (msg) => handlers[msg.name](u1, msg.data, child))
+    child.send({name: 'setup'})
   })
 })
 
 test('handshake and checkHandshake', (t) => {
   const path = prefix + '/handshake-test'
+  var user1
   createDir(path)
   const handlers = {
-    startHandshake: (u1, key, child) => {
-      handshake(u1, key, (u1, u2) => {
+    startHandshake: (key, child) => {
+      handshake(user1, key, (u1, u2) => {
         const followPath = path + '/u1-base/follows/' + u2.name + '-' + u2.id
         t.assert(fs.existsSync(followPath + '/user.json'), 'Follow directory is created with the other users dat')
         t.strictEqual(u1.follows[u2.id], followPath, 'Follower entry is added')
         t.assert(fs.existsSync(path + '/u1-base/public-metadat/handshakes/' + u2.id + '.gpg'), 'Encrypted handshake file is created in the public metadat')
         t.assert(fs.existsSync(path + '/u1-base/relationships/' + u2.name + '-' + u2.id + '/.dat'), 'Relationship directory with dat is created')
+        console.log(u1.publicMetadatKey)
         child.send({name: 'checkHandshake', data: u1.publicMetadatKey})
       })
     }
-  , checkComplete: (u1, relationships, child) => {
-      t.assert(relationships[u1.id] && relationships[u1.id].path, 'Creates a relationship entry in user.json')
+  , checkComplete: (relationships, child) => {
+      t.assert(relationships[user1.id] && relationships[user1.id].path, 'Creates a relationship entry in user.json')
       child.send({name: 'completed'})
-      u1.publicMetadat.close()
+      user1.publicMetadat.close()
       t.end()
     }
+  , handShakeComplete: () => { console.log('handshake complete') }
   }
-  setup({path: path + '/u1-base', name: 'u1', passphrase: 'arstarst', numBits: 512}, (u1) => {
-    // Initialize another dat user in a forked process
-    const child = fork('./test/child-process-handshake.js')
-    child.on("message", (msg) => handlers[msg.name](u1, msg.data, child))
+  const child = fork('./test/child-process-handshake.js')
+  child.on("message", (msg) => handlers[msg.name](msg.data, child))
+  child.on('close', (code) =>console.log(`child process exited with code ${code}`))
+  setup({path: path + '/u1-base', name: 'u1', passphrase: 'arstarst', numBits: 512}, (u) => {
+    user1 = u
+    child.send({name: 'setup'})
   })
 })
+

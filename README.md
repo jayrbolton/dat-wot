@@ -1,5 +1,7 @@
 # dat + pgp for encrypted, p2p user interaction and data sharing
 
+> *Note:* This project is still very much an experimental work in progress.
+
 This integrates dat with Open PGP to allow for a 100% p2p and encrypted data sharing system and user-level controls, like controlling who can see what data. This is intended to be a node API on which we could build a data-sharing UI with permissions and user interaction.
 
 _what it does_
