@@ -92,11 +92,12 @@ test.only('handshake and checkHandshake', (t) => {
         t.strictEqual(u1.follows[u2.id], followPath, 'Follower entry is added')
         t.assert(fs.existsSync(path + '/u1-base/public/handshakes/' + u2.id), 'Encrypted handshake file is created in the public metadat')
         t.assert(fs.existsSync(path + '/u1-base/relationships/' + u2.name + '-' + u2.id + '/.dat'), 'Relationship directory with dat is created')
-        child.send({name: 'checkHandshake', data: u1.publicMetadatKey})
+        console.log('checking handshake', u1.publicMetadat.key.toString('hex'))
+        child.send({name: 'checkHandshake', data: u1.publicMetadat.key.toString('hex')})
         relationshipDat = dat
       })
     }
-  , checkComplete: (relationships, child) => {
+  , checkComplete: (relationships) => {
       t.assert(relationships[user1.id] && relationships[user1.id].path, 'Creates a relationship entry in user.json')
       child.send({name: 'completed'})
       user1.publicMetadat.close()
@@ -106,10 +107,14 @@ test.only('handshake and checkHandshake', (t) => {
   , handShakeComplete: () => { console.log('handshake complete') }
   }
   const child = fork('./test/child-process-handshake.js')
-  child.on("message", (msg) => handlers[msg.name](msg.data, child))
+  child.on("message", (msg) => {
+    console.log('got', msg.name)
+    handlers[msg.name](msg.data)
+  })
   child.on('close', (code) => console.log(`child process exited with code ${code}`))
   setup({path: path + '/u1-base', name: 'u1', passphrase: 'arstarst'}, (u) => {
     user1 = u
+    console.log('setup returned')
     child.send({name: 'setup'})
   })
 })

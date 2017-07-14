@@ -11,7 +11,6 @@ const handlers = {
     })
   }
 , checkHandshake: (key) => {
-  console.log('child checkHandshake started')
     checkHandshake(user, key, (userA, userB) => {
       console.log('child checkHandshake finished')
       process.send({name: 'checkComplete', data: userA.relationships})
@@ -31,6 +30,7 @@ const handlers = {
 }
 
 process.on('message', (msg) => {
+  console.log('child got', msg.name)
   const {name, data} = msg
   handlers[name](data)
 })
