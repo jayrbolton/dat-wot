@@ -11,25 +11,26 @@ createDir(prefix)
 
 test('setup', (t) => {
   const path = prefix + '/setup-test'
-  setup({path, name: 'jay', passphrase: 'arstarst', numBits: 512}, (user) => {
+  setup({path, name: 'jay', passphrase: 'arstarst'}, (user) => {
     // Test creation of all files
     user.publicMetadat.close()
     t.assert(fs.existsSync(path), 'creates parent directory')
-    t.assert(fs.existsSync(path + '/public-metadat/.dat'), 'creates public metadat')
+    t.assert(fs.existsSync(path + '/privkey'), 'creates privkey')
+    t.assert(fs.existsSync(path + '/public/pubkey'), 'creates pubkey')
+    t.assert(fs.existsSync(path + '/public/.dat'), 'creates public metadat')
     t.end()
   })
 })
 
-test('load', (t) => {
+test.only('load', (t) => {
   // Test load dat
-  setup({path: prefix + '/load-test', name: 'jay', passphrase: 'arstarst', numBits: 512}, (user) => {
+  setup({path: prefix + '/load-test', name: 'jay', passphrase: 'arstarst'}, (user) => {
     user.publicMetadat.close()
     load(prefix + '/load-test', 'arstarst', (user) => {
-      t.assert(user.pubKey, 'retrieves pubkey')
-      t.assert(user.publicMetadatKey, 'retrieves public metadat')
-      t.deepEqual(user.publicDats, [], 'public dat list')
-      t.deepEqual(user.relationships, [], 'relationship list')
-      t.deepEqual(user.follows, [], 'follows list')
+      t.assert(user.pubKey, 'retrieves pubKey')
+      t.assert(user.privKey, 'retrieves privKey')
+      t.assert(user.publicMetadat, 'retrieves public metadat instance')
+      t.assert(user.id, 'retrieves user id')
       t.end()
     })
   })
@@ -37,7 +38,7 @@ test('load', (t) => {
 
 test('create public dat', (t) => {
   const path = prefix + '/create-dat-public'
-  setup({path, name: 'jay', passphrase: 'arstarst', numBits: 512}, (user) => {
+  setup({path, name: 'jay', passphrase: 'arstarst'}, (user) => {
     user.publicMetadat.close()
     createDat(user, {name: 'test', public: true}, (metadat) => {
       t.assert(fs.existsSync(path + '/dats/test/.dat'))
@@ -70,7 +71,7 @@ test('follow', (t) => {
   const child = fork('./test/child-process-follow.js')
   child.on("message", (msg) => handlers[msg.name](msg.data, child))
   child.on('close', (code) =>console.log(`child process exited with code ${code}`))
-  setup({path: path + '/u1-base', name: 'u1', passphrase: 'arstarst', numBits: 512}, (u1) => {
+  setup({path: path + '/u1-base', name: 'u1', passphrase: 'arstarst'}, (u1) => {
     user1 = u1
     console.log('finished parent process setup', new Date())
     // Initialize another dat user in a forked process
@@ -105,7 +106,7 @@ test('handshake and checkHandshake', (t) => {
   const child = fork('./test/child-process-handshake.js')
   child.on("message", (msg) => handlers[msg.name](msg.data, child))
   child.on('close', (code) =>console.log(`child process exited with code ${code}`))
-  setup({path: path + '/u1-base', name: 'u1', passphrase: 'arstarst', numBits: 512}, (u) => {
+  setup({path: path + '/u1-base', name: 'u1', passphrase: 'arstarst'}, (u) => {
     user1 = u
     child.send({name: 'setup'})
   })
