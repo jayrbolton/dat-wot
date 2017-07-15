@@ -9,6 +9,8 @@ _what it does_
 - send encrypted communication with your contacts over dat
 - publicly share dats
 
+[_how it works_](https://github.com/jayrbolton/dat-pki/wiki/How-it-Works)
+
 # api
 
 ## setup(options, cb)
