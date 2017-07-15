@@ -30,6 +30,7 @@ test('load', (t) => {
       t.assert(user.privKey, 'retrieves privKey')
       t.assert(user.publicDat, 'retrieves public dat instance')
       t.assert(user.id, 'retrieves user id')
+      user.publicDat.close()
       t.end()
     })
   })
@@ -81,7 +82,7 @@ test('follow', (t) => {
   })
 })
 
-test.only('handshake and checkHandshake', (t) => {
+test('handshake and checkHandshake', (t) => {
   const path = prefix + '/handshake-test'
   fs.ensureDir(path)
   var userA, relDat, relDatFrom
