@@ -106,7 +106,6 @@ test('handshake and checkHandshake', (t) => {
         const followPath = path + '/userA-base/follows/' + userB.id
         t.assert(fs.existsSync(followPath + '/.dat'), 'Follow directory is created with the other users dat')
         t.assert(fs.existsSync(path + '/userA-base/public/handshakes/' + userB.id), 'Encrypted handshake file is created in the public dat')
-        t.assert(fs.existsSync(path + '/userA-base/relationships/' + userB.id + '/.dat'), 'Relationship directory with dat is created')
         child.send({name: 'checkAndStartHandshake', data: userA.publicDat.key.toString('hex')})
         relDat = dat
       })
@@ -118,9 +117,11 @@ test('handshake and checkHandshake', (t) => {
       })
     }
   , checkComplete: (userBID) => {
-      t.assert(fs.existsSync(path + '/userA-base/relationships/' + userBID), 'creates the relationships dir for userA->userB' )
-      t.assert(fs.existsSync(path + '/userB-base/relationships/from/' + userA.id + '/.dat'))
       child.send({name: 'completed'})
+      t.assert(fs.existsSync(path + '/userA-base/relationships/' + userBID + '/.dat'), 'sets up push rel dat for userA->userB')
+      t.assert(fs.existsSync(path + '/userA-base/relationships/from/' + userBID + '/.dat'), 'sets up read rel dat for userB->userA')
+      t.assert(fs.existsSync(path + '/userB-base/relationships/from/' + userA.id + '/.dat'), 'sets up read rel dat for userA->userB')
+      t.assert(fs.existsSync(path + '/userB-base/relationships/' + userA.id + '/.dat'), 'sets up push rel dat for userB->userA')
       relDat.close()
       relDatFrom.close()
       userA.publicDat.close()
