@@ -11,20 +11,20 @@ const handlers = {
     })
   }
 , checkHandshake: (key) => {
-    checkHandshake(user, key, (userA, userB) => {
+    checkHandshake(user, key, (userA, userB, relDat) => {
       console.log('child checkHandshake finished')
-      process.send({name: 'checkComplete', data: userA.relationships})
+      process.send({name: 'checkComplete', data: {userB, relDat}})
     })
   }
 , completed: () => {
-    user.publicMetadat.close()
+    user.publicDat.close()
     process.exit(1)
   }
 , setup: () => {
-    setup({path: 'test/tmp/handshake-test/u2-base', name: 'u2', passphrase: 'arstarst', numBits: 512}, (u) => {
+    setup({path: 'test/tmp/handshake-test/userB-base', name: 'userB', passphrase: 'arstarst', numBits: 512}, (u) => {
       user = u
       console.log('child process finished setup')
-      process.send({name: 'startHandshake', data: user.publicMetadat.key.toString('hex')})
+      process.send({name: 'startHandshake', data: user.publicDat.key.toString('hex')})
     })
   }
 }

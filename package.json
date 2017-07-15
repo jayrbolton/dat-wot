@@ -8,9 +8,8 @@
   },
   "dependencies": {
     "dat-node": "3.5.0",
-    "fs-extra": "^4.0.0",
+    "fs-extra": "4.0.0",
     "mirror-folder": "2.0.0",
-    "ramda": "0.24.1",
     "random-access-memory": "2.4.0",
     "sodium-native": "1.10.2",
     "uuid": "3.1.0"
