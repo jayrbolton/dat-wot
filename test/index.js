@@ -39,7 +39,7 @@ test('load', (t) => {
   })
 })
 
-test.only('load - invalid pass', (t) => {
+test('load - invalid pass', (t) => {
   // Test load dat
   setup({path: prefix + '/load-test', name: 'jay', pass: 'arstarst!'}, (user) => {
     user.publicDat.close()
