@@ -27,7 +27,7 @@ const handlers = {
     process.exit(1)
   }
 , setup: () => {
-    setup({path: 'test/tmp/handshake-test/userB-base', name: 'userB', passphrase: 'arstarst', numBits: 512}, (u) => {
+    setup({path: 'test/tmp/handshake-test/userB-base', name: 'userB', pass: 'arstarst', numBits: 512}, (u) => {
       userB = u
       process.send({name: 'startHandshake', data: userB.publicDat.key.toString('hex')})
     })

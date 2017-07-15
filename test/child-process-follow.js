@@ -11,7 +11,7 @@ const handlers = {
     process.exit(1)
   }
 , setup: () => {
-    setup({path: prefix + '/follow-test/userB-base', name: 'finn', passphrase: 'arstarst'}, (u) => {
+    setup({path: prefix + '/follow-test/userB-base', name: 'finn', pass: 'arstarst'}, (u) => {
       userB = u
       process.send({name: 'startFollow', data: userB.publicDat.key.toString('hex')})
     })
