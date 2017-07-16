@@ -2,24 +2,25 @@ const {setup, handshake} = require('../')
 
 const prefix = 'test/tmp'
 
-var user
+var userB
 
 const handlers = {
   completed: () => {
     console.log('in: child process completed')
-    user.publicMetadat.close()
+    userB.publicDat.close()
     process.exit(1)
   }
 , setup: () => {
-    setup({path: prefix + '/follow-test/u2-base', name: 'finn', passphrase: 'arstarst', numBits: 512}, (u) => {
-      user = u
-      process.send({name: 'startFollow', data: user.publicMetadat.key.toString('hex')})
+    setup({path: prefix + '/follow-test/userB-base', name: 'finn', pass: 'arstarst'}, (u) => {
+      userB = u
+      process.send({name: 'startFollow', data: userB.publicDat.key.toString('hex')})
     })
   }
 }
 
 process.on('message', (msg) => {
   const {name, data} = msg
+  console.log('child received', name)
   handlers[name](data)
 })
 
