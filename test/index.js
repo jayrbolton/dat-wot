@@ -3,7 +3,7 @@ const json = require('../lib/utils/json')
 const test = require('tape')
 const fs = require('fs-extra')
 const assert = require('assert')
-const {setup, load, follow, createDat, handshake, checkHandshake} = require('../')
+const {setup, load, follow, createPublicDat, handshake, checkHandshake} = require('../')
 
 const prefix = 'test/tmp'
 fs.ensureDir(prefix)
@@ -54,7 +54,7 @@ test('create public dat', (t) => {
   const path = prefix + '/create-dat-public'
   setup({path, name: 'jay', pass: 'arstarst'}, (user) => {
     user.publicDat.close()
-    createDat(user, {name: 'test', public: true}, (dat) => {
+    createPublicDat(user, 'test', (dat) => {
       t.assert(fs.existsSync(path + '/dats/test/.dat'))
       const dats = json.read(path + '/public/dats.json')
       t.deepEqual(dats.test, dat.key.toString("hex"))
