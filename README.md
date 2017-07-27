@@ -1,175 +1,132 @@
-# dat + pgp for encrypted, p2p user interaction and data sharing
+# dat public key infrastucture
 
-> *Note:* This project is still very much an experimental work in progress.
+> *Note:* This project is still very much an experimental work in progress. The examples below arent reliable.
 
-This integrates dat with Open PGP to allow for a 100% p2p and encrypted data sharing system and user-level controls, like controlling who can see what data. This is intended to be a node API on which we could build a data-sharing UI with permissions and user interaction.
+Create decentralized user accounts with contacts, groups, private file sharing, encrypted messaging, and more.
 
 _what it does_
-- privately share specific dats with specific people and groups over p2p using PGP
-- send encrypted communication with your contacts over dat
+- create your own user and group identities which can span multiple devices
+- privately share specific dats with specific people and groups over p2p using cryptography
+- send messages with certain contacts over dat
 - publicly share dats
 
 [_how it works_](https://github.com/jayrbolton/dat-pki/wiki/How-it-Works)
 
 # api
 
-## setup(options, cb)
+## setup(options, callback)
 
-Create a new metadat user. The `options` takes these parameters:
-* path: path you want to use to save your data (eg `~/.metadat`)
+Create a new user. The `options` object can have these properties:
+* path: path you want to use to save your data (eg `~/.dat`)
 * name: name to use for this user
-* passphrase: passphrase for generating PGP keys
+* pass: passphrase for generating keypair
 
-`setup` takes an optional callback, which will receive the user object:
+`callback` receives arguments for `callback(err, user)`, where `user` is an object with these properties:
+* name
+* path
+* pubKey
+* privKey
+* id: a unique id that identifies this user across devices in the network (public)
+* publicDat: a dat object for the user's public dat
+* link: dat link of the users public dat that others can use to add them as a contact
+
+The `publicDat` will be opened and joined on the network, so you'll want to manually `user.publicDat.close()` when you're done
 
 ```js
-const metadat = require('metadat')
+const {setup} = require('dat-pki')
 
-metadat.setup({
-  path: '~/.metadat'
+setup({
+  path: '~/.dat'
 , name: 'bob ross'
-, passphrase: '123abc'
-}, function(user) {
-  // user is an object with pgp keys, dat keys, and more
+, passphrase: '123 abc'
+}, (err, user) => {
+  // do stuff with the user
 })
 ```
 
-## load(path, passphrase)
+## load(path, passphrase, callback)
 
-This will load an existing metadat root directory and unencrypt things using the given passphrase.
+This will load an existing user from a directory with a passphrase, and unencrypt their stuff.
+
+The callback takes `callback(err, user)`. The user object in the second argument to this callback is the exact same object as the one from `setup`
 
 ```js
-metadat.load('~/.metadat', '123abc', function(user) {
-  // the user object is provided, needed for many functions below
-  user.pubKey // pgp public key
-  user.publicMetadat // key of the user's public metadat
-  user.relationships // other users that they have contact entries for
-  user.follows // other users that they are following
+const {load} = require('dat-pki')
+
+load('~/.dat', '123 abc', (err, user) => {
+  // do stuff with the user
 })
 ```
 
-## handshake(userA, userBKey, cb)
+## createDat(user, datName, callback)
 
-Initialize a handshake to establish a relationship/contact with another user. Pass in a dat address of userB's public metadat.
+Initialize a new dat for a user. The callback receives `callback(err, dat)` where `dat` is the dat object. The new dat has not joined the network or imported files, so you'll want to call `dat.joinNetwork()`, `dat.importFiles()`, and anything else you want. The `datName` needs to be unique for this user.
 
-This will create another dat, called the "relationship dat". That dat's address will get encrypted using userB's PGP pubkey and placed in userA's public metadat for userB to read and save.
+Also see makeDatPublic and shareDat.
 
-If both userA and userB successfully handshake with eachother, the contact is created.
+## makeDatPublic(user, datName, callback)
 
-See checkHandshake
+Make a dat fully public, so users that follow you can download its files. The callback receives `callback(err, dat)` where `dat` is the dat object
 
-```js
-handshake(userA, userBKey, function(dat, userA, userB) { })
-```
+## makeDatPrivate(user, datName, callback)
+
+Remove a dat link from your public dat, so others cannot automatically see the dat. Changes the dat key.
+
+## shareDat(user, datName, accessIDs, callback)
+
+Share a dat with one or more contacts and/or groups by their ids. callback gets `callback(err, dat)`
+
+## unshareDat(user, datName, accessIds, callback)
+
+Unshare a dat from certain contacts/groups. Changes the dat link.
+
+## follow(userA, userBLink, callback)
+
+Follow another user, which allows userA to read any public data from userB, such as their public dat links.
+
+The callback receives `callback(err, userB)`, where `userB` is an object with these properties:
+- id
+- name
+- pubKey
+- path
+- link
+
+## handshake(userA, userBLink, callback)
+
+To create a 1:1 private data channel with another user, they both perform a handshake process. If the handshake succeeds, the two users are now "contacts" and can send private data to each other, including links to private dats.
+
+This will create another dat, called the "relationship dat". That dat's address will get encrypted using userB's pubkey and placed in userA's public handshakes directory for userB to check using `checkHandshake`.
+
+If both userA and userB successfully handshake with each other, the contact is created. Both users will have separate "relationship dats" for pushing data to the other user.
+
+Also see checkHandshake
+
+The callback receives `callback(err, userB, relDat)`. The third arg, `relDat`, is a dat object for the relationship dat. It is opened automatically
 
 ## checkHandshake(userA, userB, cb)
 
-Check if userB has initiated a handshake for userA. If so, userA will validate the handshake file, decrypt the dat address, and pull the relationship dat.
+`userA` wants to check the status of a handshake that `userB` initiated. If `userB` has a handshake file in their public dat, then `userA` can decrypt it and start downloading from the relationship dat.
 
-```js
-checkHandshake(userA, userB, function(dat, userA, userB) {
-  // dat will be the dat object for userB's relationship dat
-})
-```
+The callback receives `callback(err, userB, relFromDat)`. If the check fails, then err will be non-null. The third arg, `relFromDat`, is the dat that userA has created to download updates from userA. It is opened automatically.
 
-## share(userA, datKey, userB, cb)
+## createGroup(user, groupName, callback)
 
-Share a regular dat with a contact. It will find the relationship metadat for this contact and add the given dat key into the list of shared dats.
+Create a group identified by a name. The callback receives `callback(err, groupID)`. 
 
-```js
-// User with key userA shares dat with key 'datKey' with contact  userB
-metadat.share(userA, 'datKey', userB, function() {
-  // Share is complete
-})
-```
+## addUsersToGroup(user, groupID, [userIDs], callback)
 
-## groupShare(userA, datKey, groupName, cb)
+Add one or more users in your contacts to a group. The users must all be contacts with relationships established using handshake and checkHandshake.
 
-Share a dat with a group
+## removeUsersFromGroup(user, groupID, [userIDs], callback)
 
-```js
-metadat.shareGroup(userA, 'datKey', 'groupName', function() {
-  // Share is complete
-})
-```
+Remove one or more users from a group
 
-## unshare(userKey, datKey, contactKey, cb)
+## postMessage(userA, userBID, message, cb)
 
-Removes a dat key from a relationship metadat and generates a new dat key, so the contact can no longer read any updates (but will likely still have a copy on their own device).
+Send a message to another user or group. The other user must be a contact.
 
-```js
-// User userA unshares dat 'datKey' with contact userB
-metadat.unshare(userA, 'datKey', userB, function() {
-  // Unshare is complete
-})
-```
-
-## follow
-
-Follow another user's public metadat
-
-```js
-metadat.follow(userA, userB, function(dats) {
-  // dats is an array of public dats from userB
-})
-```
-
-## addToGroup(userA, groupName, userB, cb) 
-
-Add a contact to a group.
-
-```js
-metadat.addToGroup(userA, 'groupName', userB, function() {
-  // Add to group is complete
-})
-```
-
-## create(userA, path, cb)
-
-Create a new dat, private by default. Pass in the user object and a path for the dat.
-
-```js
-metadat.create(userA, path, function(key) {
-  // dat is created, dat key is now available
-})
-```
-
-## publicize(userA, datKey, cb)
-
-Make a dat public for userA. This will add it into the public listing in their public metadat.
-
-```js
-metadat.publicize(userA, 'datKey', function() {
-  // dat is now public
-})
-```
-
-## privatize(userA, datKey, cb)
-
-Remove a dat key from your public listing and change the key.
-
-```js
-metadat.privatize(userA, 'datKey', function() {
-  // dat is no longer public
-})
-```
-
-## postMessage(userA, message, userB, cb)
-
-Post a message from one user to another
-
-```js
-metadat.postMessage(userA, 'message content', userB, function() {
-  // Message has been posted
-})
-```
-
-## readMessages(userA, cb)
+## readMessages(user, cb)
 
 Read all messages for a user
 
-```js
-metadat.readMessages(userA, function(messages) {
-  // messages is an array of message objects
-})
-```
+
