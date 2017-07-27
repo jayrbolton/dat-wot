@@ -3,19 +3,23 @@ const {setup, handshake, checkHandshake, createDat} = require('../')
 
 var userB, relDatFrom, relDat
 
+process.on('message', ({name, data}) => handlers[name](data))
+
 const handlers = {
   setup: () => {
     setup({path: 'test/tmp/createDat-test/userB-base', name: 'userB', pass: 'arstarst', numBits: 512}, (err, u) => {
-      console.log("!!!!!!!!", err, u)
+      if (err) throw err
       userB = u
       process.send({name: 'handshake', data: userB.publicDat.key.toString('hex')})
     })
   }
   // check the handshake from userA and also initate a handshake with them
 , handshake: (userAKey) => {
-    checkHandshake(userB, userAKey, (userB, userA, dat) => {
+    checkHandshake(userB, userAKey, (err, userA, dat) => {
+      if (err) throw err
       relDatFrom = dat
-      handshake(userB, userAKey, (userB, userA, dat) => {
+      handshake(userB, userAKey, (err, userA, dat) => {
+        if (err) throw err
         relDat = dat
         process.send({name: 'checkHandshake', data: userB.publicDat.key.toString('hex')})
       })
@@ -28,9 +32,3 @@ const handlers = {
     process.exit(1)
   }
 }
-
-process.on('message', (msg) => {
-  console.log('child got', msg.name)
-  const {name, data} = msg
-  handlers[name](data)
-})

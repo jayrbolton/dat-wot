@@ -4,7 +4,7 @@ const test = require('tape')
 const fs = require('fs-extra')
 const assert = require('assert')
 
-const {setup, createDat, handshake, checkHandshake} = require('../')
+const {setup, createDat, shareDat, handshake, checkHandshake} = require('../')
 const prefix = 'test/tmp'
 fs.ensureDir(prefix)
 
@@ -23,40 +23,46 @@ test('createDat for contact', (t) => {
   // Parent directory of test folders, files, and dats for this test
   const path = prefix + '/createDat-test'
   fs.ensureDir(path)
-  var userA, relDat, relDatFrom
+  let userA, relDat, relDatFrom
   const child = fork('./test/createDat-childProcess.js')
   // Handle messages from the child process to this parent process
-  child.on("message", (msg) => {
-    const {name, data} = msg
-    console.log('parent got', name)
-    handlers[name](data)
-  })
+  child.on("message", ({name, data}) => handlers[name](data))
   child.on('close', (code) => console.log(`child process exited with code ${code}`))
   // Set up userA
-  setup({path: path + '/userA-base', name: 'userA', pass: 'arstarst'}, (u) => {
+  setup({path: path + '/userA-base', name: 'userA', pass: 'arstarst'}, (err, u) => {
+    if (err) throw err
     userA = u
     child.send({name: 'setup'})
   })
   const handlers = {
     handshake: (userBKey) => {
-      handshake(userA, userBKey, (userA, userB, dat) => {
-        child.send({name: 'handshake', data: userA.publicDat.key.toString('hex')})
+      handshake(userA, userBKey, (err, userB, dat) => {
+        if (err) throw err
         relDat = dat
+        child.send({name: 'handshake', data: userA.publicDat.key.toString('hex')})
       })
     }
   , checkHandshake: (userBKey) => {
-      checkHandshake(userA, userBKey, (userA, userB, dat) => {
+      checkHandshake(userA, userBKey, (err, userB, dat) => {
+        if (err) throw err
         relDatFrom = dat
-        createDat(userA, 'userAShare', [userB.id], (dat) => {
-          relDat.close()
-          relDatFrom.close()
-          userA.publicDat.close()
-          const dats = json.read(path + '/userA-base/relationships/' + userB.id + '/dats.json')
-          console.log("DATS", dats)
-          t.deepEqual(dats.userAShare, dat.key.toString('hex'))
-          t.assert(fs.existsSync(path + '/userA-base/dats/' + dat.key.toString('hex') + '/.dat'))
-          child.send({name: 'done', data: null})
-          t.end()
+        createDat(userA, 'userAShare', (err, dat) => {
+          if (err) throw err
+          shareDat(userA, dat, 'userAShare', [userB.id], (err) => {
+            if (err) throw err
+            relDat.close()
+            relDatFrom.close()
+            userA.publicDat.close()
+            console.log('before json read')
+            json.read(path + '/userA-base/relationships/' + userB.id + '/dats.json', (err, dats) => {
+              console.log('after json read')
+              if (err) throw err
+              t.deepEqual(dats.userAShare, dat.key.toString('hex'), 'puts dat key in push-rel-dat')
+              t.assert(fs.existsSync(path + '/userA-base/dats/userAShare/.dat'), 'creates dat dir')
+              child.send({name: 'done', data: null})
+              t.end()
+            })
+          })
         })
       })
     }

@@ -7,5 +7,6 @@ module.exports = {
 , createDat: require('./lib/createDat')
 , handshake: require('./lib/handshake')
 , checkHandshake: require('./lib/checkHandshake')
+, shareDat: require('./lib/shareDat')
 }
 
