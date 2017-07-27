@@ -21,7 +21,7 @@
     "tape": "4.6.3"
   },
   "scripts": {
-    "test": "([ -e test/tmp ] && rm -r test/tmp) ; tape test/createDat.js | tap-spec"
+    "test": "([ -e test/tmp ] && rm -r test/tmp) ; tape test/index.js | tap-spec"
   },
   "repository": {
     "type": "git",

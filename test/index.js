@@ -3,7 +3,7 @@ const json = require('../lib/utils/json')
 const test = require('tape')
 const fs = require('fs-extra')
 const assert = require('assert')
-const {setup, load, follow, createPublicDat, handshake, checkHandshake} = require('../')
+const {setup, load, follow, createDat, makeDatPublic, handshake, checkHandshake} = require('../')
 
 const prefix = 'test/tmp'
 fs.ensureDir(prefix)
@@ -59,13 +59,16 @@ test('create public dat', (t) => {
   setup({path, name: 'jay', pass: 'arstarst'}, (err, user) => {
     if (err) throw err
     user.publicDat.close()
-    createPublicDat(user, 'test', (err, dat) => {
+    createDat(user, 'test', (err, dat) => {
       if (err) throw err
       t.assert(fs.existsSync(path + '/dats/test/.dat'))
-      json.read(path + '/public/dats.json', (err, dats) => {
-        t.deepEqual(dats.test, dat.key.toString("hex"))
-        dat.close()
-        t.end()
+      makeDatPublic(user, dat, 'test', (err) => {
+        if (err) throw err
+        json.read(path + '/public/dats.json', (err, dats) => {
+          t.deepEqual(dats.test, dat.key.toString("hex"))
+          dat.close()
+          t.end()
+        })
       })
     })
   })
@@ -151,3 +154,5 @@ test('handshake and checkHandshake', (t) => {
     }
   }
 })
+
+require('./createDat')
