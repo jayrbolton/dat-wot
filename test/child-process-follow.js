@@ -1,8 +1,8 @@
 const {setup, handshake} = require('../')
-
 const prefix = 'test/tmp'
+let userB
 
-var userB
+process.on('message', ({name, data}) => handlers[name](data))
 
 const handlers = {
   completed: () => {
@@ -11,16 +11,11 @@ const handlers = {
     process.exit(1)
   }
 , setup: () => {
-    setup({path: prefix + '/follow-test/userB-base', name: 'finn', pass: 'arstarst'}, (u) => {
+    setup({path: prefix + '/follow-test/userB-base', name: 'finn', pass: 'arstarst'}, (err, u) => {
+      if (err) throw err
       userB = u
       process.send({name: 'startFollow', data: userB.publicDat.key.toString('hex')})
     })
   }
 }
-
-process.on('message', (msg) => {
-  const {name, data} = msg
-  console.log('child received', name)
-  handlers[name](data)
-})
 

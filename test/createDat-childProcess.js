@@ -5,7 +5,8 @@ var userB, relDatFrom, relDat
 
 const handlers = {
   setup: () => {
-    setup({path: 'test/tmp/createDat-test/userB-base', name: 'userB', pass: 'arstarst', numBits: 512}, (u) => {
+    setup({path: 'test/tmp/createDat-test/userB-base', name: 'userB', pass: 'arstarst', numBits: 512}, (err, u) => {
+      console.log("!!!!!!!!", err, u)
       userB = u
       process.send({name: 'handshake', data: userB.publicDat.key.toString('hex')})
     })

@@ -11,6 +11,8 @@
     "fs-extra": "4.0.0",
     "mirror-folder": "2.0.0",
     "random-access-memory": "2.4.0",
+    "run-parallel": "1.1.6",
+    "run-waterfall": "1.1.3",
     "sodium-native": "1.10.2",
     "uuid": "3.1.0"
   },
@@ -19,7 +21,7 @@
     "tape": "4.6.3"
   },
   "scripts": {
-    "test": "([ -e test/tmp ] && rm -r test/tmp) ; tape test/createDat.js | tap-spec"
+    "test": "([ -e test/tmp ] && rm -r test/tmp) ; tape test/index.js | tap-spec"
   },
   "repository": {
     "type": "git",
