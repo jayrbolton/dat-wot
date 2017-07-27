@@ -121,12 +121,3 @@ Add one or more users in your contacts to a group. The users must all be contact
 
 Remove one or more users from a group
 
-## postMessage(userA, userBID, message, cb)
-
-Send a message to another user or group. The other user must be a contact.
-
-## readMessages(user, cb)
-
-Read all messages for a user
-
-
