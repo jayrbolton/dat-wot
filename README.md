@@ -36,9 +36,9 @@ The `publicDat` will be opened and joined on the network, so you'll want to manu
 const {setup} = require('dat-pki')
 
 setup({
-  path: '~/.dat'
-, name: 'bob ross'
-, passphrase: '123 abc'
+  path: '~/.dat',
+  name: 'bob ross',
+  passphrase: '123 abc'
 }, (err, user) => {
   // do stuff with the user
 })

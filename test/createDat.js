@@ -2,13 +2,12 @@ const fork = require('child_process').fork
 const json = require('../lib/utils/json')
 const test = require('tape')
 const fs = require('fs-extra')
-const assert = require('assert')
 
 const {setup, createDat, shareDat, handshake, checkHandshake} = require('../')
 const prefix = 'test/tmp'
 fs.ensureDir(prefix)
 
-// Integration tests for creating a new dat for a certain contacts/groups 
+// Integration tests for creating a new dat for a certain contacts/groups
 
 // sequence of events for this test
 // - parent sets up user
@@ -26,7 +25,7 @@ test('createDat for contact', (t) => {
   let userA, relDat, relDatFrom
   const child = fork('./test/createDat-childProcess.js')
   // Handle messages from the child process to this parent process
-  child.on("message", ({name, data}) => handlers[name](data))
+  child.on('message', ({name, data}) => handlers[name](data))
   child.on('close', (code) => console.log(`child process exited with code ${code}`))
   // Set up userA
   setup({path: path + '/userA-base', name: 'userA', pass: 'arstarst'}, (err, u) => {
@@ -41,8 +40,8 @@ test('createDat for contact', (t) => {
         relDat = dat
         child.send({name: 'handshake', data: userA.publicDat.key.toString('hex')})
       })
-    }
-  , checkHandshake: (userBKey) => {
+    },
+    checkHandshake: (userBKey) => {
       checkHandshake(userA, userBKey, (err, userB, dat) => {
         if (err) throw err
         relDatFrom = dat
