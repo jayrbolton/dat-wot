@@ -6,7 +6,7 @@ const {makeDatPublic, createDat, setup, close} = require('../')
 const path = './test/tmp/createPublicDat/'
 const datName = 'public-test-dat'
 
-test.only('create public dat', (t) => {
+test('create public dat', (t) => {
   setup({path, name: 'finn', pass: 'arstarst'}, (err, user) => {
     if (err) throw err
     // Create a new empty & private dat
