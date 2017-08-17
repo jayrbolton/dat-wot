@@ -13,12 +13,14 @@ test('create public dat', (t) => {
     createDat(user, datName, (err, user, dat) => {
       if (err) throw err
       t.assert(fs.existsSync(path + '/dats/' + datName + '/.dat'))
+      t.strictEqual(user.dats[datName].public, false, 'dat is not marked as public initially')
       // Make the dat publicly listed
       makeDatPublic(user, datName, (err, user) => {
         if (err) throw err
         t.assert(user.dats[datName], 'sets an entry for the dat on the user')
         t.strictEqual(user.dats[datName].key, dat.key.toString('hex'), 'saves the dat key on the user')
         t.equal(user.dats[datName].instance, dat, 'saves the dat instance on the user')
+        t.assert(user.dats[datName].public, 'marks the dat under the user as public')
         json.read(path + '/public/dats.json', (err, dats) => {
           if (err) throw err
           t.deepEqual(dats['public-test-dat'].key, dat.key.toString('hex'), 'saves the dat key to their public dats.json')
