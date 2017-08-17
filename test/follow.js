@@ -4,7 +4,7 @@ const fs = require('fs-extra')
 const {follow, setup, getPublicDats, close} = require('../')
 
 // Integration test for the follow function
-test.only('follow', (t) => {
+test('follow', (t) => {
   const path = './test/tmp/follow-test'
   fs.ensureDir(path)
   const child = fork('./test/follow-childProcess.js')
@@ -34,7 +34,7 @@ test.only('follow', (t) => {
     listDats: (datKey) => {
       getPublicDats(userA, userB, (err, dats) => {
         if (err) throw err
-        t.strictEqual(dats.test, datKey)
+        t.strictEqual(dats.test.key, datKey)
         close(userA, (err) => { if (err) throw err })
         child.send({name: 'completed'})
         t.end()
