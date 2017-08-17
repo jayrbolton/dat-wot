@@ -12,7 +12,32 @@ _what it does_
 
 [_how it works_](https://github.com/jayrbolton/dat-pki/wiki/How-it-Works)
 
+
+# Data
+
+## local user
+
+A local, fully-controlled user is an object with these properties:
+* path: file path to their root directory
+* publicDat: dat-node instance for their public dat (path + '/public')
+* name: string name (can be anything)
+* id: uuid of the user
+* dats: object of dats they have created with properties:
+  * instance: dat-node instance
+  * name: string
+* pushRelDats: relationship dats where this user pushes data to another user. Object of {userID: datInstance}
+* pullRelDats: relationship dats where this user pulls data from another user. Object of {userID: datInstance}
+* pubKey: buffer public key from the user's keypair
+* privkey: buffer private key from the user's keypair
+
+A remote user is being followed or is a contact, and the local user does not have control of them. Remote users have:
+* id: uuid
+* pubKey: their public key
+* publicDat: a dat-node instance of their public dat
+
 # api
+
+> Note: this is in flux
 
 ## setup(options, callback)
 
