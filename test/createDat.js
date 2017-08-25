@@ -2,8 +2,9 @@ const fork = require('child_process').fork
 const json = require('../lib/utils/json')
 const test = require('tape')
 const fs = require('fs-extra')
+const waterfall = require('run-waterfall')
 
-const {setup, createDat, shareDat, handshake, checkHandshake} = require('../')
+const {setup, createDat, shareDat, handshake, checkHandshake, close} = require('../')
 const prefix = 'test/tmp'
 fs.ensureDir(prefix)
 
@@ -22,7 +23,7 @@ test('createDat for contact', (t) => {
   // Parent directory of test folders, files, and dats for this test
   const path = prefix + '/createDat-test'
   fs.ensureDir(path)
-  let userA, relDat, relDatFrom
+  let userA, userB, sharedDat
   const child = fork('./test/createDat-childProcess.js')
   // Handle messages from the child process to this parent process
   child.on('message', ({name, data}) => handlers[name](data))
@@ -35,35 +36,36 @@ test('createDat for contact', (t) => {
   })
   const handlers = {
     handshake: (userBKey) => {
-      handshake(userA, userBKey, (err, userB, dat) => {
+      handshake(userA, userBKey, (err, userB) => {
         if (err) throw err
-        relDat = dat
         child.send({name: 'handshake', data: userA.publicDat.key.toString('hex')})
       })
     },
     checkHandshake: (userBKey) => {
-      checkHandshake(userA, userBKey, (err, userB, dat) => {
+      waterfall([
+        cb => checkHandshake(userA, userBKey, cb),
+        (u, dat, cb) => {
+          userB = u
+          createDat(userA, 'userAShare', cb)
+        },
+        (dat, cb) => {
+          sharedDat = dat
+          t.assert(fs.existsSync(path + '/userA-base/dats/userAShare/.dat'), 'creates dat dir')
+          shareDat(userA, 'userAShare', [userB.id], cb)
+        },
+        (_, cb) => {
+          json.read(path + '/userA-base/relationships/' + userB.id + '/dats.json', cb)
+        }
+      ], (err, dats) => {
         if (err) throw err
-        relDatFrom = dat
-        createDat(userA, 'userAShare', (err, dat) => {
-          if (err) throw err
-          shareDat(userA, dat, 'userAShare', [userB.id], (err) => {
-            if (err) throw err
-            relDat.close()
-            relDatFrom.close()
-            userA.publicDat.close()
-            console.log('before json read')
-            json.read(path + '/userA-base/relationships/' + userB.id + '/dats.json', (err, dats) => {
-              console.log('after json read')
-              if (err) throw err
-              t.deepEqual(dats.userAShare, dat.key.toString('hex'), 'puts dat key in push-rel-dat')
-              t.assert(fs.existsSync(path + '/userA-base/dats/userAShare/.dat'), 'creates dat dir')
-              child.send({name: 'done', data: null})
-              t.end()
-            })
-          })
-        })
+        t.deepEqual(dats.userAShare, sharedDat.key.toString('hex'), 'puts dat key in push-rel-dat')
+        child.send({name: 'getDat', data: userA.id})
       })
+    },
+    done: (dats) => {
+      t.strictEqual(dats[userA.id].userAShare, sharedDat.key.toString('hex'), 'fetches the shared dat')
+      close(userA, (err) => { if (err) throw err })
+      t.end()
     }
   }
 })

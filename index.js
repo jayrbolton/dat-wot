@@ -8,5 +8,6 @@ module.exports = {
   checkHandshake: require('./lib/checkHandshake'),
   shareDat: require('./lib/shareDat'),
   getPublicDats: require('./lib/getPublicDats'),
+  getSharedDats: require('./lib/getSharedDats'),
   close: require('./lib/close')
 }

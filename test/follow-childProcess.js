@@ -15,11 +15,10 @@ const handlers = {
     })
   },
   createDat: () => {
-    createDat(userB, 'test', (err, uB, dat) => {
+    createDat(userB, 'test', (err, dat) => {
       if (err) throw err
-      makeDatPublic(userB, 'test', (err, uB) => {
+      makeDatPublic(userB, 'test', (err) => {
         if (err) throw err
-        userB = uB
         process.send({name: 'listDats', data: dat.key.toString('hex')})
       })
     })

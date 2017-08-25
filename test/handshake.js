@@ -29,8 +29,7 @@ test('handshake and checkHandshake', (t) => {
 
   const handlers = {
     startHandshake: (key) => {
-      handshake(userA, key, (err, uA, userB, dat) => {
-        userA = uA
+      handshake(userA, key, (err, userB, dat) => {
         if (err) throw err
         const followPath = path + '/userA/follows/' + userB.id
         t.assert(fs.existsSync(followPath + '/.dat'), 'Follow directory is created with the other users dat')
@@ -40,8 +39,7 @@ test('handshake and checkHandshake', (t) => {
     },
 
     checkHandshake: (userBKey) => {
-      checkHandshake(userA, userBKey, (err, uA, userB, dat) => {
-        userA = uA
+      checkHandshake(userA, userBKey, (err, userB, dat) => {
         if (err) throw err
         child.send({name: 'checkComplete', data: null})
       })

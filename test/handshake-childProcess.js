@@ -14,11 +14,9 @@ const handlers = {
     })
   },
   checkAndStartHandshake: (key) => {
-    checkHandshake(userB, key, (err, uB, userA, dat) => {
-      userB = uB
+    checkHandshake(userB, key, (err, userA, dat) => {
       if (err) throw err
-      handshake(userB, key, (err, uB, userA, dat) => {
-        userB = uB
+      handshake(userB, key, (err, userA, dat) => {
         if (err) throw err
         process.send({name: 'checkHandshake', data: userB.publicDat.key.toString('hex')})
       })
