@@ -71,7 +71,6 @@ test('integration', (t) => {
     checkHandshake: (userBKey) => {
       const datsFrom = JSON.parse(fs.readFileSync(userA.path + '/relationships/' + userB.id + '/dats.json'))
       const datsTo = JSON.parse(fs.readFileSync(`${path}/userB/relationships/from/${userA.id}/dats.json`))
-      console.log({datsFrom, datsTo})
       t.deepEqual(datsFrom, datsTo, 'sets push rel dat for userA->userB')
       waterfall([
         cb => pki.checkHandshake(userA, userBKey, cb),
