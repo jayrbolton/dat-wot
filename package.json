@@ -7,8 +7,13 @@
     "test": "test"
   },
   "dependencies": {
+    "dat-download": "git+https://github.com/jayrbolton/dat-download.git#allow-existing-dir",
     "dat-node": "3.5.1",
+    "debug": "3.1.0",
     "fs-extra": "4.0.0",
+    "mirror-folder": "2.1.1",
+    "mkdirp": "0.5.1",
+    "pump": "1.0.2",
     "random-access-memory": "2.4.0",
     "run-parallel": "1.1.6",
     "run-waterfall": "1.1.3",
@@ -16,12 +21,13 @@
     "uuid": "3.1.0"
   },
   "devDependencies": {
+    "dependency-check": "2.9.1",
     "standard": "10.0.3",
     "tap-spec": "4.1.1",
     "tape": "4.6.3"
   },
   "scripts": {
-    "test": "standard; ([ -e ./test/tmp ] && rm -r ./test/tmp) ; tape test/index.js | tap-spec"
+    "test": "standard && dependency-check package.json && ([ -e ./test/tmp ] && rm -r ./test/tmp) && tape test/index.js | tap-spec"
   },
   "repository": {
     "type": "git",
@@ -32,7 +38,7 @@
     "pki"
   ],
   "author": "jay r bolton <jayrbolton@gmail.com> (http://jayrbolton.com/)",
-  "license": "GPL",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/jayrbolton/dat-pki/issues"
   },
