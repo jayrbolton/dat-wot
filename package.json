@@ -1,46 +1,41 @@
 {
-  "name": "dat-pki",
+  "name": "dat-wot",
   "version": "0.0.1",
-  "description": "user identity over dat",
+  "description": "Friend to friend networking using Dat",
   "main": "index.js",
   "directories": {
     "test": "test"
   },
   "dependencies": {
-    "dat-download": "git+https://github.com/jayrbolton/dat-download.git#allow-existing-dir",
-    "dat-node": "3.5.1",
-    "debug": "3.1.0",
-    "fs-extra": "4.0.0",
-    "mirror-folder": "2.1.1",
-    "mkdirp": "0.5.1",
-    "pump": "1.0.2",
-    "random-access-memory": "2.4.0",
+    "dat-node": "3.5.6",
+    "discovery-swarm": "4.4.2",
+    "fs-extra": "4.0.3",
+    "hyperdb": "1.5.0",
     "run-parallel": "1.1.6",
     "run-waterfall": "1.1.3",
-    "sodium-universal": "1.4.0",
-    "uuid": "3.1.0"
+    "sodium-universal": "2.0.0"
   },
   "devDependencies": {
-    "dependency-check": "2.9.1",
-    "standard": "10.0.3",
-    "tap-spec": "4.1.1",
-    "tape": "4.6.3"
+    "dependency-check": "^2.9.1",
+    "standard": "^10.0.3",
+    "tap-spec": "^4.1.1",
+    "tape": "^4.8.0"
   },
   "scripts": {
     "test": "standard && dependency-check package.json && ([ -e ./test/tmp ] && rm -r ./test/tmp) && tape test/index.js | tap-spec"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jayrbolton/dat-pki.git"
+    "url": "git+https://github.com/jayrbolton/dat-wot.git"
   },
   "keywords": [
-    "dat",
-    "pki"
+    "Dat",
+    "node-wot"
   ],
   "author": "jay r bolton <jayrbolton@gmail.com> (http://jayrbolton.com/)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/jayrbolton/dat-pki/issues"
+    "url": "https://github.com/jayrbolton/dat-wot/issues"
   },
-  "homepage": "https://github.com/jayrbolton/dat-pki#readme"
+  "homepage": "https://github.com/jayrbolton/dat-wot#readme"
 }
