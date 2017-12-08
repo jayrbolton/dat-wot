@@ -38,6 +38,16 @@ test('integration', (t) => {
   })
 
   const handlers = {
+    loadUserAndRunDaemon: () => {
+      pki.load(path + '/userA', 'arstarst', function (err, user) {
+        handleErr(err)
+        pki.run(user, function (err, dat) {
+          handleErr(err)
+          child.send({name: 'startRunning', data: dat.key.toString('hex')})
+        })
+      })
+    },
+
     // Follow userB
     startFollow: (userBKey) => {
       pki.follow(userA, userBKey, (err, uB) => {

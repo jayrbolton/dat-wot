@@ -19,7 +19,15 @@ const handlers = {
     pki.setup({path: path + '/userB', name: 'userB', pass: 'arstarst'}, (err, u) => {
       handleErr(err)
       userB = u
-      process.send({name: 'startFollow', data: userB.publicDat.key.toString('hex')})
+      process.send({name: 'loadUserAndRunDaemon'})
+    })
+  },
+
+  startRunning: (userAProfileDatKey) => {
+    pki.run(userB, function (err) {
+      handleErr(err)
+      pki.sendContactRequest(userB, userAProfileDatKey)
+      console.log('running...')
     })
   },
 
