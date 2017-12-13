@@ -27,7 +27,10 @@ const handlers = {
     pki.run(userB, function (err) {
       handleErr(err)
       pki.sendContactRequest(userB, userAProfileDatKey)
-      console.log('running...')
+      pki.follow(userB, userAProfileDatKey, function (err, file) {
+        handleErr(err)
+        console.log('fire!', file)
+      })
     })
   },
 

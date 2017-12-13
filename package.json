@@ -7,10 +7,12 @@
     "test": "test"
   },
   "dependencies": {
+    "dat-download": "1.0.1",
     "dat-node": "3.5.6",
     "discovery-swarm": "4.4.2",
     "fs-extra": "4.0.3",
     "hyperdb": "1.5.0",
+    "random-access-memory": "2.4.0",
     "run-parallel": "1.1.6",
     "run-waterfall": "1.1.3",
     "sodium-universal": "2.0.0"
@@ -22,7 +24,7 @@
     "tape": "^4.8.0"
   },
   "scripts": {
-    "test": "standard && dependency-check package.json && ([ -e ./test/tmp ] && rm -r ./test/tmp) && tape test/index.js | tap-spec"
+    "test": "dependency-check package.json && standard && ([ -e ./test/tmp ] && rm -r ./test/tmp) && tape test/index.js | tap-spec"
   },
   "repository": {
     "type": "git",

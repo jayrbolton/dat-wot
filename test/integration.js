@@ -28,9 +28,11 @@ test('integration', (t) => {
     pki.close(userA, err => { handleErr(err) })
     throw err
   }
+
   child.on('message', ({name, data}) => {
     handlers[name](data)
   })
+
   pki.setup({path: path + '/userA', name: 'userA', pass: 'arstarst'}, (err, u) => {
     handleErr(err)
     userA = u
